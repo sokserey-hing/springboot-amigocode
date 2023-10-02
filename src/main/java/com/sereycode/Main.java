@@ -20,11 +20,11 @@ public class Main {
         GreetResponse response = new GreetResponse(
                 "Hello",
                 List.of("Java","GoLang","Scala"),
-                new Person("Sam")
+                new Person("Sam", 28, 100000)
                 );
          return  response;
     }
-    record Person(String name){
+    record Person(String name, int age, double savings){
 
     }
     record GreetResponse(
