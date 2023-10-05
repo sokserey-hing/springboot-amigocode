@@ -1,11 +1,14 @@
 package com.sereycode;
 
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @SpringBootApplication
 @RestController
@@ -32,26 +35,44 @@ public class Main {
             Integer age
     ){}
     @PostMapping
-    public void addCustomer(@RequestBody NewCustomerRequest request){
+    public ResponseEntity<Void> addCustomer(@RequestBody NewCustomerRequest request) {
         Customer customer = new Customer();
         customer.setName(request.name());
         customer.setEmail(request.email());
         customer.setAge(request.age());
         customerRepository.save(customer);
+        return ResponseEntity.ok().build();
     }
+
 
     @DeleteMapping("{customerId}")
     public void deleteCustomer(@PathVariable("customerId") Integer id){
         customerRepository.deleteById(id);
     }
+
+    @PutMapping("{customerId}")
+    public void updateCustomer(@PathVariable("customerId") Integer id, @RequestBody NewCustomerRequest request) {
+        Optional<Customer> optionalCustomer = customerRepository.findById(id);
+        if (optionalCustomer.isPresent()) {
+            Customer existingCustomer = optionalCustomer.get();
+            existingCustomer.setName(request.name());
+            existingCustomer.setEmail(request.email());
+            existingCustomer.setAge(request.age());
+            customerRepository.save(existingCustomer);
+        } else {
+            throw new EntityNotFoundException("Customer not found with ID: " + id);
+        }
+    }
+
+
     @GetMapping("/greet")
     public GreetResponse greet(){
         GreetResponse response = new GreetResponse(
                 "Hello",
                 List.of("Java","GoLang","Scala"),
                 new Person("Sam", 28, 100000)
-                );
-         return  response;
+        );
+        return  response;
     }
     record Person(String name, int age, double savings){
 
